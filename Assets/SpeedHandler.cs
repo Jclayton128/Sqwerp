@@ -9,6 +9,9 @@ public class SpeedHandler : MonoBehaviour
     [SerializeField] float _baseReverseVelocity = 0.5f;
     [SerializeField] float _baseStrafeVelocity = 0.75f;
 
+    [SerializeField] float aimRate = 90f;
+
+
     void Start()
     {
         

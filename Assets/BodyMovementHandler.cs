@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent (typeof (SpeedHandler), typeof (InputHandler), typeof (Rigidbody))]
 [RequireComponent (typeof (Collider))]
-public class MovementHandler : MonoBehaviour
+public class BodyMovementHandler : MonoBehaviour
 {
     SpeedHandler sh;
     InputHandler ih;
@@ -42,6 +42,7 @@ public class MovementHandler : MonoBehaviour
     {
         HandleForwardMovement();
         HandleStrafeMovement();
+        HandleAim();
 
         //if (Mathf.Abs(ih.CommandedStrafeSignal * ih.CommandedForwardSignal) <= Mathf.Epsilon)
         //{
@@ -51,6 +52,11 @@ public class MovementHandler : MonoBehaviour
         
         HoverOffSurface();
 
+    }
+
+    private void HandleAim()
+    {
+        
     }
 
     private void HoverOffSurface()
