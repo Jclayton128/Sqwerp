@@ -14,8 +14,8 @@ public class HeadMovementHandler : MonoBehaviour
     //param
     float aimNullZone = 10f;
     [SerializeField] float yawToTurn = 45f;
-    [SerializeField] float yawGimbal = 60;
-    [SerializeField] float pitchGimbal = 90f;
+    float yawGimbal = 60;
+    float pitchGimbal = 20f;
 
     //state
     float currentYaw;
@@ -88,6 +88,24 @@ public class HeadMovementHandler : MonoBehaviour
         {
             updateRotation.x = transform.localRotation.eulerAngles.x +
                 (Mathf.Sign(CommandedPitchSignal) * sh.aimRate * Time.deltaTime);
+
+            if (updateRotation.x > pitchGimbal && updateRotation.x < 180f)
+            {
+                Debug.Log($"should limit downward pitch");
+                updateRotation.x = pitchGimbal - 1;
+            }
+            if (updateRotation.x > 180f && updateRotation.x < (360f - pitchGimbal))
+            {
+                Debug.Log($"should limit upward pitch");
+                updateRotation.x = (360 - pitchGimbal + 1f);
+            }
+
+
+
+            //if (updateRotation.y < (360 - yawGimbal) && updateRotation.y > yawGimbal)
+            //{
+            //    updateRotation.y = (360 - yawGimbal + 1);
+            //}
         }
     }
 
