@@ -5,11 +5,12 @@ using UnityEngine;
 public class SpeedHandler : MonoBehaviour
 {
     //param
-    [SerializeField] float _baseForwardVelocity = 1f;
-    [SerializeField] float _baseReverseVelocity = 0.5f;
-    [SerializeField] float _baseStrafeVelocity = 0.75f;
+    [SerializeField] float _baseForwardVelocity = 10f;
+    [SerializeField] float _baseReverseVelocity = 5f;
+    [SerializeField] float _baseStrafeVelocity = 7.5f;
+    [SerializeField] float _baseRotationRate = 120f;
 
-    [SerializeField] float aimRate = 90f;
+    public float aimRate { get; protected set; } = 90f;
 
 
     void Start()
@@ -36,5 +37,10 @@ public class SpeedHandler : MonoBehaviour
     public float GetStrafeVelocity()
     {
         return _baseStrafeVelocity;
+    }
+
+    public float GetRotationRate()
+    {
+        return _baseRotationRate;
     }
 }

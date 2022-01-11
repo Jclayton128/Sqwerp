@@ -3,19 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent (typeof (SpeedHandler), typeof (InputHandler), typeof (Rigidbody))]
-[RequireComponent (typeof (Collider))]
 public class BodyMovementHandler : MonoBehaviour
 {
     SpeedHandler sh;
     InputHandler ih;
     Rigidbody rb;
-    Collider coll;
+    BoxCollider coll;
+    HeadMovementHandler hmh;
 
     //param
     float hoverDistance_y = 1.5f;
+    float hoverForce = 20f;
 
     //state
+    public float requestedYaw;
     float distFromSurface;
+    Vector3 surfaceNormal;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +26,8 @@ public class BodyMovementHandler : MonoBehaviour
         sh = GetComponent<SpeedHandler>();
         ih = GetComponent<InputHandler>();
         rb = GetComponent<Rigidbody>();
-        coll = GetComponent<Collider>();
+        coll = GetComponent<BoxCollider>();
+        hmh = GetComponentInChildren<HeadMovementHandler>();
     }
 
     private void Update()
@@ -36,6 +40,8 @@ public class BodyMovementHandler : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(transform.position, -1 * transform.up, out hit);
         distFromSurface = hit.distance;
+        surfaceNormal = hit.normal;
+        Debug.DrawLine(transform.position, transform.position + surfaceNormal, Color.green);
     }
 
     private void FixedUpdate()
@@ -43,37 +49,35 @@ public class BodyMovementHandler : MonoBehaviour
         HandleForwardMovement();
         HandleStrafeMovement();
         HandleAim();
+        HoverOffSurfaceNormal();
 
-        //if (Mathf.Abs(ih.CommandedStrafeSignal * ih.CommandedForwardSignal) <= Mathf.Epsilon)
-        //{
-        //    rb.velocity = Vector3.zero;
-        //}
-
-        
-        HoverOffSurface();
 
     }
 
+    public void SetRequestedYaw(float requestedYaw)
+    {
+        this.requestedYaw = requestedYaw;
+    }
     private void HandleAim()
     {
-        
+        if (Mathf.Abs(requestedYaw) > 0)
+        {
+            transform.Rotate(transform.up, requestedYaw * sh.GetRotationRate() * Time.deltaTime, Space.Self);
+        }
     }
 
-    private void HoverOffSurface()
+    private void HoverOffSurfaceNormal()
     {
-        if (distFromSurface < hoverDistance_y)
-        {
-            Vector3 hoverPos = new Vector3(0, hoverDistance_y - distFromSurface, 0);
-            transform.position += hoverPos;
-        }
-
+        rb.AddRelativeForce(transform.up * (hoverDistance_y - distFromSurface) * hoverForce);
+        //transform.up = Vector3.Lerp(transform.up, surfaceNormal, Time.deltaTime);
     }
 
     private void HandleStrafeMovement()
     {
         if (Mathf.Abs(ih.CommandedStrafeSignal) > 0)
         {
-            rb.AddForce(ih.CommandedStrafeSignal * transform.right * sh.GetStrafeVelocity());
+            rb.AddForce(ih.CommandedStrafeSignal * transform.right * sh.GetStrafeVelocity(), ForceMode.Impulse);
+
         }
 
 
@@ -83,11 +87,11 @@ public class BodyMovementHandler : MonoBehaviour
     {
         if (ih.CommandedForwardSignal > 0)
         {
-            rb.AddForce(transform.forward * sh.GetForwardVelocity());
+            rb.AddForce(transform.forward * sh.GetForwardVelocity(), ForceMode.Impulse);
         }
         if (ih.CommandedForwardSignal < 0)
         {
-            rb.AddForce(-1 * transform.forward * sh.GetReverseVelocity());
+            rb.AddForce(-1 * transform.forward * sh.GetReverseVelocity(), ForceMode.Impulse);
         }
     }
 }

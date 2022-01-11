@@ -18,7 +18,11 @@ public class PlayerInputHandler : InputHandler
     void Update()
     {
         ListenForKeyboardInput();
-        ListenForMouseInput();
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            ListenForMouseInput();
+        }
+
     }
 
 
