@@ -91,12 +91,10 @@ public class HeadMovementHandler : MonoBehaviour
 
             if (updateRotation.x > pitchGimbal && updateRotation.x < 180f)
             {
-                Debug.Log($"should limit downward pitch");
                 updateRotation.x = pitchGimbal - 1;
             }
             if (updateRotation.x > 180f && updateRotation.x < (360f - pitchGimbal))
             {
-                Debug.Log($"should limit upward pitch");
                 updateRotation.x = (360 - pitchGimbal + 1f);
             }
 

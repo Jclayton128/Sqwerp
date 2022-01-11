@@ -12,16 +12,17 @@ public class BodyMovementHandler : MonoBehaviour
     HeadMovementHandler hmh;
 
     //param
-    float hoverDistance_y = 1.5f;
+    float hoverDistance_y = 2f;
     float hoverForce = 20f;
     float adjustToNewSurfaceNormalRate = 180f;
+    Vector3 surfaceRaycastDirection_moving = new Vector3(0, -1, 4);
+    Vector3 surfaceRaycastDirection_still = new Vector3(0, -1, 0);
 
     //state
-    public float deltaFromSurface_pitch;
-    public float deltaFromSurface_roll;
     float requestedYaw;
     float distFromSurface;
     Vector3 surfaceNormal;
+    public bool isOnSurface;
 
     // Start is called before the first frame update
     void Start()
@@ -40,10 +41,36 @@ public class BodyMovementHandler : MonoBehaviour
 
     private void CalculateHoverDistance()
     {
-        RaycastHit hit;
-        Physics.Raycast(transform.position, -1 * transform.up, out hit);
-        distFromSurface = hit.distance;
-        surfaceNormal = hit.normal;
+        RaycastHit hit = new RaycastHit();
+        Vector3 raydir = Vector3.down;
+
+        if (ih.CommandedForwardSignal > 0)
+        {
+            Debug.Log("moving");
+            raydir = surfaceRaycastDirection_moving;
+        }
+        if (ih.CommandedForwardSignal >= 0)
+        {
+            raydir = surfaceRaycastDirection_still;
+        }
+
+        Physics.Raycast(transform.position, raydir, out hit);
+
+        if (hit.collider)
+        {
+            Debug.DrawLine(transform.position, hit.point, Color.yellow);
+            isOnSurface = true;
+            distFromSurface = hit.distance;
+            surfaceNormal = hit.normal;
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, raydir, Color.yellow);
+            isOnSurface = false;
+            distFromSurface = 99f;
+            surfaceNormal = Vector3.up;
+        }
+
         Debug.DrawLine(transform.position, transform.position + surfaceNormal, Color.green);
     }
 
@@ -71,13 +98,16 @@ public class BodyMovementHandler : MonoBehaviour
 
     private void HoverOffSurfaceNormal()
     {
-        rb.AddRelativeForce(transform.up * (hoverDistance_y - distFromSurface) * hoverForce);
-        //transform.up = Vector3.Lerp(transform.up, surfaceNormal, Time.deltaTime);
+        if (isOnSurface)
+        {
+            rb.AddRelativeForce(transform.up * (hoverDistance_y - distFromSurface) * hoverForce);
+            //transform.up = Vector3.Lerp(transform.up, surfaceNormal, Time.deltaTime);
 
-        Quaternion deltaRot = Quaternion.FromToRotation(this.transform.up, surfaceNormal);
-        Quaternion targRot = deltaRot * this.transform.rotation;
-        this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targRot, Time.deltaTime * adjustToNewSurfaceNormalRate);
+            Quaternion deltaRot = Quaternion.FromToRotation(this.transform.up, surfaceNormal);
+            Quaternion targRot = deltaRot * this.transform.rotation;
+            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targRot, Time.deltaTime * adjustToNewSurfaceNormalRate);
 
+        }
 
     }
 
