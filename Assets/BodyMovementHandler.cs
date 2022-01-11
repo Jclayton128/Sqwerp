@@ -14,9 +14,12 @@ public class BodyMovementHandler : MonoBehaviour
     //param
     float hoverDistance_y = 1.5f;
     float hoverForce = 20f;
+    float adjustToNewSurfaceNormalRate = 180f;
 
     //state
-    public float requestedYaw;
+    public float deltaFromSurface_pitch;
+    public float deltaFromSurface_roll;
+    float requestedYaw;
     float distFromSurface;
     Vector3 surfaceNormal;
 
@@ -70,6 +73,12 @@ public class BodyMovementHandler : MonoBehaviour
     {
         rb.AddRelativeForce(transform.up * (hoverDistance_y - distFromSurface) * hoverForce);
         //transform.up = Vector3.Lerp(transform.up, surfaceNormal, Time.deltaTime);
+
+        Quaternion deltaRot = Quaternion.FromToRotation(this.transform.up, surfaceNormal);
+        Quaternion targRot = deltaRot * this.transform.rotation;
+        this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targRot, Time.deltaTime * adjustToNewSurfaceNormalRate);
+
+
     }
 
     private void HandleStrafeMovement()
