@@ -9,6 +9,8 @@ public class SpeedHandler : MonoBehaviour
     [SerializeField] float _baseReverseVelocity = 5f;
     [SerializeField] float _baseStrafeVelocity = 7.5f;
     [SerializeField] float _baseRotationRate = 180f;
+    float jumpForce = 10f;
+    Vector3 jumpVector = new Vector3(0, 1,0);
 
     public float aimRate { get; protected set; } = 60f;
 
@@ -42,5 +44,10 @@ public class SpeedHandler : MonoBehaviour
     public float GetRotationRate()
     {
         return _baseRotationRate;
+    }
+
+    public Vector3 GetJumpVector()
+    {
+        return jumpVector * jumpForce;
     }
 }

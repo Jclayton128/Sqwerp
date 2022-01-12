@@ -40,7 +40,8 @@ public class PlayerInputHandler : InputHandler
     private void ListenForKeyboardInput()
     {
         CommandedForwardSignal = GetForwardSignal();
-        CommandedStrafeSignal = GetStrafeSignal();        
+        CommandedStrafeSignal = GetStrafeSignal();
+        JumpRequested = Input.GetKeyUp(KeyCode.Space);
     }
 
     private float GetStrafeSignal()
