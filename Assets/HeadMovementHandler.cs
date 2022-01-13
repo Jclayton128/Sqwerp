@@ -14,7 +14,7 @@ public class HeadMovementHandler : MonoBehaviour
     //param
     float aimNullZone = 3f;
     [SerializeField] float yawToTurn = 20f;
-    float yawGimbal = 60;
+    float yawGimbal = 20;
     float pitchGimbal = 20f;
 
     //state
@@ -48,7 +48,7 @@ public class HeadMovementHandler : MonoBehaviour
 
         TurnHead();
 
-        TransmitBodyTurnSignals();
+        //TransmitBodyTurnSignals();
     }
 
 

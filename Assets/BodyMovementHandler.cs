@@ -12,15 +12,15 @@ public class BodyMovementHandler : MonoBehaviour
     HeadMovementHandler hmh;
 
     //param
-    float hoverDistance_y = 2f;
-    float hoverForce = 20f;
+    float maxAdhesionDist = 2f;
+    float adhesionForce = 20f;
     float adjustToNewSurfaceNormalRate = 180f;
-    Vector3 surfaceRaycastDirection_moving = new Vector3(0, -1, 8);
+    Vector3 surfaceRaycastDirection_moving = new Vector3(0, -1, 1);
     Vector3 surfaceRaycastDirection_still = new Vector3(0, -1, 0);
 
     //state
     float requestedYaw;
-    float distFromSurface;
+    public float distFromSurface;
     Vector3 surfaceNormal;
     public bool isOnSurface;
 
@@ -42,20 +42,21 @@ public class BodyMovementHandler : MonoBehaviour
     private void CalculateHoverDistance()
     {
         RaycastHit hit = new RaycastHit();
-        Vector3 raydir = Vector3.down;
+        Vector3 raydir = surfaceRaycastDirection_moving;
 
+        //if (ih.CommandedForwardSignal <= 0)
+        //{
+        //    raydir = surfaceRaycastDirection_still;
+        //}
         //if (ih.CommandedForwardSignal > 0)
         //{
         //    raydir = surfaceRaycastDirection_moving;
 
         //}
-        //if (ih.CommandedForwardSignal >= 0)
-        //{
-        //    raydir = surfaceRaycastDirection_still;
-        //}
 
-        Physics.Linecast(transform.position, transform.position + (raydir * hoverDistance_y), out hit) ;
-        Debug.DrawLine(transform.position, transform.position + (raydir * hoverDistance_y), Color.yellow, 0.1f);
+
+        Physics.Linecast(transform.position, transform.position + (raydir * maxAdhesionDist), out hit) ;
+        Debug.DrawLine(transform.position, transform.position + (raydir * maxAdhesionDist), Color.yellow, 0.1f);
         if (hit.collider)
         {
             //Debug.DrawLine(transform.position, hit.point, Color.yellow, 0.1f);
@@ -78,10 +79,23 @@ public class BodyMovementHandler : MonoBehaviour
     {
         HandleJump();
         HandleForwardMovement();
-        HandleStrafeMovement();
-        HandleAim();
+        //HandleStrafeMovement();
+
+        HandleTurn();
+        //HandleAim();
         HoverOffSurfaceNormal();
 
+
+    }
+
+    private void HandleTurn()
+    {
+        if (!isOnSurface) { return; }
+        float signal = ih.CommandedYawSignal;
+        if (Mathf.Abs(signal) > 0)
+        {
+            transform.Rotate(transform.up, signal * sh.GetRotationRate() * Time.deltaTime, Space.Self);
+        }
 
     }
 
@@ -110,7 +124,10 @@ public class BodyMovementHandler : MonoBehaviour
         if (isOnSurface)
         {
             rb.useGravity = false;
-            //rb.AddRelativeForce(transform.up * (hoverDistance_y - distFromSurface) * hoverForce);
+            rb.AddForce(-1 * surfaceNormal * adhesionForce); //* (distFromSurface - maxAdhesionDist));
+            Debug.DrawLine(transform.position,
+                transform.position + (-1 * surfaceNormal * adhesionForce * (distFromSurface - maxAdhesionDist)),
+                Color.cyan) ;
             //transform.up = Vector3.Lerp(transform.up, surfaceNormal, Time.deltaTime);
 
             Quaternion deltaRot = Quaternion.FromToRotation(this.transform.up, surfaceNormal);
@@ -127,9 +144,9 @@ public class BodyMovementHandler : MonoBehaviour
 
     private void HandleStrafeMovement()
     {
-        if (Mathf.Abs(ih.CommandedStrafeSignal) > 0)
+        if (Mathf.Abs(ih.CommandedYawSignal) > 0)
         {
-            rb.AddForce(ih.CommandedStrafeSignal * transform.right * sh.GetStrafeVelocity(), ForceMode.Impulse);
+            rb.AddForce(ih.CommandedYawSignal * transform.right * sh.GetStrafeVelocity(), ForceMode.Impulse);
 
         }
 
@@ -138,6 +155,7 @@ public class BodyMovementHandler : MonoBehaviour
 
     private void HandleForwardMovement()
     {
+        if (!isOnSurface) { return; }
         if (ih.CommandedForwardSignal > 0)
         {
             rb.AddForce(transform.forward * sh.GetForwardVelocity(), ForceMode.Impulse);
